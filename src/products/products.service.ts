@@ -1,41 +1,33 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid'
-// import { CreateProductDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from './dto/update-product.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Product } from './entities/product.entity';
 
 
 @Injectable()
 export class ProductsService {
+  constructor(
+    @InjectModel(Product)
+    private productModel: typeof Product,
+  ) {}
 
-  private products: {
-    id: string
-    name: string,
-  }[] = []
-
-
-  create(name: string) {
-
-    this.products.push({
-      id: uuid(),
-      name
-    })
+  async create(name: string) {
+    return await this.productModel.create({ name });
   }
 
-  getAll() {
-    return this.products
+  async getAll() {
+    return await this.productModel.findAll();
   }
 
-  update(id: string, newText: string) {
-    this.products = this.products.map((product) => {
-      if (id === product.id) {
-        product.name = newText
-      }
-
-      return product
-    })
+  async update(id: number, newText: string) {
+    const product = await this.productModel.findByPk(id);
+    if (!product) {
+      throw new BadRequestException('Product not found');
+    }
+    product.name = newText;
+    return await product.save();
   }
 
-  delete(id: string) {
-    this.products = this.products.filter((e) => e.id !== id)
+  async delete(id: number) {
+    return await this.productModel.destroy({ where: { id } });
   }
 }
