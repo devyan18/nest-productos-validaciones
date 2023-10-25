@@ -1,41 +1,30 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid'
-// import { CreateProductDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from './dto/update-product.dto';
-
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
 
-  private products: {
-    id: string
-    name: string,
-  }[] = []
+  constructor(@InjectModel(Product.name) private productModel: Model<Product>) {}
 
-
-  create(name: string) {
-
-    this.products.push({
-      id: uuid(),
-      name
-    })
+  async create(product_name: string) {
+    return await this.productModel.create({ product_name })
   }
 
-  getAll() {
-    return this.products
+  async getAll() {
+    return await this.productModel.find() 
   }
 
-  update(id: string, newText: string) {
-    this.products = this.products.map((product) => {
-      if (id === product.id) {
-        product.name = newText
-      }
-
-      return product
-    })
+  async getOne(id: string) {
+    return await this.productModel.findById(id)
   }
 
-  delete(id: string) {
-    this.products = this.products.filter((e) => e.id !== id)
+  async update(id: string, newText: string) {
+    return await this.productModel.findByIdAndUpdate(id, { product_name: newText }, { new: true })
+  }
+
+  async delete(id: string) {
+    await this.productModel.findByIdAndDelete(id)
   }
 }

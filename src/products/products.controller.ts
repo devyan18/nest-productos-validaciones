@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { MongoidPipe } from './pipes/mongoid.pipe';
 import { ProductsService } from './products.service';
 
 @Controller('products')
@@ -8,8 +9,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() { name }: CreateProductDto) {
-    return this.productsService.create(name)
+  create(@Body() { product_name }: CreateProductDto) {
+    return this.productsService.create(product_name)
   }
 
   @Get()
@@ -17,13 +18,18 @@ export class ProductsController {
     return this.productsService.getAll()
   }
 
+  @Get(":productId")
+  findOne (@Param("productId", MongoidPipe) productId: string) {
+    return this.productsService.getOne(productId)
+  }
+
   @Patch(":productId")
-  editProduct(@Param("productId", ParseUUIDPipe) productId: string, @Body() {name}: UpdateProductDto) {
-    this.productsService.update(productId, name)
+  editProduct(@Param("productId", MongoidPipe) productId: string, @Body() { product_name }: UpdateProductDto) {
+    this.productsService.update(productId, product_name)
   }
 
   @Delete(":productId")
-  deleteProduct (@Param("productId", ParseUUIDPipe) productId: string) {
+  deleteProduct (@Param("productId", MongoidPipe) productId: string) {
     this.productsService.delete(productId)
   }
 }
