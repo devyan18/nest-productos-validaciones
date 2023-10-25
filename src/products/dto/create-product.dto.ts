@@ -4,4 +4,8 @@ export class CreateProductDto {
     @IsNotEmpty()
     @IsString()
     product_name: string
+
+    @IsNotEmpty()
+    @IsString()
+    category: string
 }   
